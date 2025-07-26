@@ -47,3 +47,10 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
       retries: 3
       timeout: 5s
+  adminer:
+    image: adminer:latest # Using the official Adminer Docker image
+    container_name: bagisto_adminer
+    ports:
+      - "8080:8080" # Access Adminer on port 8080 from your host
+    depends_on:
+      - mysql # Adminer needs MySQL to be running

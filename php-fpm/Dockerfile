@@ -1,3 +1,4 @@
+# php-fpm/Dockerfile
 FROM php:8.4-fpm
 
 # Install system dependencies
@@ -53,3 +54,18 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /var/www/html
+
+# Adjust PHP-FPM configuration for Bagisto (optional, but good practice)
+# Increase memory limit and execution time
+RUN echo "memory_limit = ${PHP_MEMORY_LIMIT:-512M}" > /usr/local/etc/php/conf.d/memory-limit.ini \
+    && echo "upload_max_filesize = 100M" >> /usr/local/etc/php/conf.d/upload-limit.ini \
+    && echo "post_max_size = 100M" >> /usr/local/etc/php/conf.d/upload-limit.ini \
+    && echo "max_execution_time = 300" >> /usr/local/etc/php/conf.d/execution-time.ini \
+    && echo "date.timezone = UTC" >> /usr/local/etc/php/conf.d/timezone.ini \
+    && echo "error_reporting = E_ALL & ~E_DEPRECATED & ~E_NOTICE" >> /usr/local/etc/php/conf.d/error-reporting.ini # Disable deprecated and notice warnings
+
+# Clear cache
+RUN rm -rf /var/cache/apk/*
+
+EXPOSE 9000
+CMD ["php-fpm"]
