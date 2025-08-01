@@ -1,0 +1,134 @@
+#!/bin/bash
+
+# ==============================================================================
+# AWS EC2 User Data Script for Ubuntu 24.04
+# ==============================================================================
+# This script automates the installation of a complete web development stack
+# suitable for running Laravel and Bagisto applications.
+#
+# It performs the following actions:
+# 1. Sets up a non-interactive installation environment.
+# 2. Updates the system's package list and upgrades all installed packages.
+# 3. Installs key dependencies like 'curl' and 'unzip'.
+# 4. Adds the trusted 'ondrej/php' PPA to get PHP 8.4, which is not in
+#    Ubuntu 24.04's default repositories.
+# 5. Installs PHP 8.4 along with all necessary extensions for both Laravel and
+#    Bagisto (e.g., `mbstring`, `pdo`, `gd`, `intl`, etc.).
+# 6. Installs MySQL 8.
+# 7. Installs Nginx as the web server.
+# 8. Installs Composer globally, which is the dependency manager for both
+#    frameworks.
+# 9. Installs Docker and Docker Compose for containerization.
+#
+# NOTE: This script is intended for a fresh Ubuntu 24.04 instance.
+# ==============================================================================
+
+# Set non-interactive mode for all commands to prevent any prompts
+export DEBIAN_FRONTEND=noninteractive
+
+echo "Starting user data script..."
+
+# ------------------------------------------------------------------------------
+# 1. System Update and Dependencies
+# ------------------------------------------------------------------------------
+echo "Updating and upgrading system packages..."
+apt-get update -y
+apt-get upgrade -y
+
+echo "Installing required system dependencies..."
+apt-get install -y software-properties-common curl unzip
+
+# ------------------------------------------------------------------------------
+# 2. Install PHP 8.4 and Extensions
+# ------------------------------------------------------------------------------
+# PHP 8.4 is not in the default Ubuntu 24.04 repositories.
+# We will use the 'ondrej/php' PPA, a widely trusted source.
+echo "Adding ondrej/php PPA to install PHP 8.4..."
+add-apt-repository ppa:ondrej/php -y
+apt-get update -y
+
+echo "Installing PHP 8.4 and all required extensions..."
+# This comprehensive list of extensions covers the requirements for both
+# Laravel and Bagisto, plus other commonly needed modules.
+apt-get install -y \
+    php8.4-cli \
+    php8.4-fpm \
+    php8.4-common \
+    php8.4-mysql \
+    php8.4-xml \
+    php8.4-mbstring \
+    php8.4-curl \
+    php8.4-zip \
+    php8.4-gd \
+    php8.4-intl \
+    php8.4-bcmath \
+    php8.4-dom \
+    php8.4-fileinfo \
+    php8.4-opcache \
+    php8.4-tokenizer
+
+# NOTE: If you plan to use Apache instead of Nginx, you would install
+# `libapache2-mod-php8.4` instead of `php8.4-fpm`. For example:
+# apt-get install -y libapache2-mod-php8.4
+
+# ------------------------------------------------------------------------------
+# 3. Install MySQL 8
+# ------------------------------------------------------------------------------
+echo "Installing MySQL 8..."
+apt-get install -y mysql-server
+
+# You can add commands here to secure the MySQL installation or
+# set up a database and user, but it is often better to do this
+# manually after the instance is running and you have a secure
+# connection.
+# Example:
+# mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY 'your_new_password';"
+
+# ------------------------------------------------------------------------------
+# 4. Install Nginx and Start Services
+# ------------------------------------------------------------------------------
+echo "Installing Nginx web server..."
+apt-get install -y nginx
+
+echo "Enabling and starting PHP-FPM and Nginx services..."
+systemctl start php8.4-fpm
+systemctl enable php8.4-fpm
+systemctl start nginx
+systemctl enable nginx
+
+# ------------------------------------------------------------------------------
+# 5. Install Composer
+# ------------------------------------------------------------------------------
+echo "Installing Composer globally..."
+# Download Composer installer
+curl -sS https://getcomposer.org/installer | php
+# Move Composer to a global location
+mv composer.phar /usr/local/bin/composer
+
+# ------------------------------------------------------------------------------
+# 6. Install Docker and Docker Compose
+# ------------------------------------------------------------------------------
+echo "Installing Docker and Docker Compose..."
+
+# Add Docker's official GPG key:
+apt-get update -y
+apt-get install -y ca-certificates gnupg
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+chmod a+r /etc/apt/keyrings/docker.gpg
+
+# Add the Docker repository to Apt sources:
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  tee /etc/apt/sources.list.d/docker.list > /dev/null
+apt-get update -y
+
+# Install Docker Engine, containerd, and Docker Compose
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# Add the 'ubuntu' user to the 'docker' group to run docker commands without sudo
+usermod -aG docker ubuntu
+
+echo "Installation complete!"
+echo "MySQL, PHP 8.4, Nginx, Composer, and Docker have been installed."

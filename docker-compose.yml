@@ -5,7 +5,7 @@ services:
     image: nginx:latest
     container_name: bagisto_nginx
     ports:
-      - "80:80"
+      - "8080:80"
     volumes:
       - ./:/var/www/html
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf # Ensure Nginx config exists
@@ -51,6 +51,6 @@ services:
     image: adminer:latest # Using the official Adminer Docker image
     container_name: bagisto_adminer
     ports:
-      - "8080:8080" # Access Adminer on port 8080 from your host
+      - "8081:8080" # Access Adminer on port 8080 from your host
     depends_on:
       - mysql # Adminer needs MySQL to be running
