@@ -32,25 +32,18 @@ services:
     command: >
       sh -c "
         cd /var/www/html &&
-        find . \
-          -path ./node_modules -prune -o \
-          -path ./mysql-data -prune -o \
-          -path ./.git -prune -o \
-          -exec chown www-data:www-data {} + &&
-
-        php artisan cache:clear &&
-        php artisan config:clear &&
-
-        cd public &&
-        unlink storage || true &&
-        cd .. &&
-        php artisan storage:link &&
-        php artisan optimize &&
-
+        find . -path ./node_modules -prune -o -path ./mysql-data -prune -o -path ./.git -prune -o -exec chown www-data:www-data {} +;
+        if [ -f artisan ]; then
+          php artisan cache:clear;
+          php artisan config:clear;
+          rm -f public/storage;
+          php artisan storage:link;
+          php artisan optimize;
+        fi;
         php-fpm
       "
 
-            
+        
     depends_on:
       - mysql
 
@@ -81,35 +74,35 @@ services:
     depends_on:
       - mysql
 
-  certbot_init:
-    image: certbot/certbot:latest
-    container_name: certbot_init
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    entrypoint:
-      - /bin/sh
-      - -c
-      - |
-        echo 'Waiting for nginx to be ready...'
-        sleep 15
+  # certbot_init:
+  #   image: certbot/certbot:latest
+  #   container_name: certbot_init
+  #   volumes:
+  #     - ./certbot/conf:/etc/letsencrypt
+  #     - ./certbot/www:/var/www/certbot
+  #   entrypoint:
+  #     - /bin/sh
+  #     - -c
+  #     - |
+  #       echo 'Waiting for nginx to be ready...'
+  #       sleep 15
 
-        echo 'Backing up existing certs...'
-        mkdir -p /tmp/certbackup
-        cp -r /etc/letsencrypt/* /tmp/certbackup/ || true
+  #       echo 'Backing up existing certs...'
+  #       mkdir -p /tmp/certbackup
+  #       cp -r /etc/letsencrypt/* /tmp/certbackup/ || true
 
-        echo 'Requesting initial certificate...'
-        if certbot certonly --webroot -w /var/www/certbot \
-          -d goldencart.biz \
-          --email goldencartbiz@gmail.com \
-          --agree-tos \
-          --no-eff-email \
-          --non-interactive; then
-            echo 'Certificate successfully created.'
-        else
-            echo 'Certificate request failed. Restoring backup...'
-            cp -r /tmp/certbackup/* /etc/letsencrypt/
-        fi
+  #       echo 'Requesting initial certificate...'
+  #       if certbot certonly --webroot -w /var/www/certbot \
+  #         -d goldencart.biz \
+  #         --email goldencartbiz@gmail.com \
+  #         --agree-tos \
+  #         --no-eff-email \
+  #         --non-interactive; then
+  #           echo 'Certificate successfully created.'
+  #       else
+  #           echo 'Certificate request failed. Restoring backup...'
+  #           cp -r /tmp/certbackup/* /etc/letsencrypt/
+  #       fi
 
   # certbot:
   #   image: certbot/certbot:latest
