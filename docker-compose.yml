@@ -71,22 +71,24 @@ services:
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    entrypoint: >
-      /bin/sh -c "
-        echo 'Waiting for nginx to be ready...' &&
-        sleep 15 &&
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        echo 'Waiting for nginx to be ready...'
+        sleep 15
         if [ ! -f /etc/letsencrypt/live/goldencart.biz/fullchain.pem ]; then
-          echo 'Requesting initial certificate...' &&
+          echo 'Requesting initial certificate...'
           certbot certonly --webroot -w /var/www/certbot \
             -d goldencart.biz \
-            --email your_email@example.com \
+            --email goldencartbiz@gmail.com \
             --agree-tos \
             --no-eff-email \
-            --noninteractive;
+            --non-interactive
         else
-          echo 'Certificate already exists, skipping.';
+          echo 'Certificate already exists, skipping.'
         fi
-      "
+
 
   certbot:
     image: certbot/certbot:latest
