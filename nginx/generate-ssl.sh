@@ -1,6 +1,6 @@
 #!/bin/sh
 
-CERT_DIR="/etc/letsencrypt/live/goldencart.biz"
+CERT_DIR="/etc/letsencrypt/demmy/goldencart.biz"
 DUMMY_KEY="$CERT_DIR/privkey.pem"
 DUMMY_CERT="$CERT_DIR/fullchain.pem"
 
