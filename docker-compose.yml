@@ -30,11 +30,27 @@ services:
       DB_PASSWORD: "${DB_PASSWORD}"
       PHP_MEMORY_LIMIT: 512M
     command: >
-        sh -c "find /var/www/html \
-        -path /var/www/html/.git -prune -o \
-        -path /var/www/html/node_modules -prune -o \
-        -path /var/www/html/mysql-data -prune -o \
-        -exec chown www-data:www-data {} + && php-fpm"     
+      sh -c "
+        cd /var/www/html &&
+        find . \
+          -path ./node_modules -prune -o \
+          -path ./mysql-data -prune -o \
+          -path ./.git -prune -o \
+          -exec chown www-data:www-data {} + &&
+
+        php artisan cache:clear &&
+        php artisan config:clear &&
+
+        cd public &&
+        unlink storage || true &&
+        cd .. &&
+        php artisan storage:link &&
+        php artisan optimize &&
+
+        php-fpm
+      "
+
+            
     depends_on:
       - mysql
 
