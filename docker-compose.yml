@@ -77,7 +77,6 @@ services:
       - |
         echo 'Waiting for nginx to be ready...'
         sleep 15
-        if [ ! -f /etc/letsencrypt/live/goldencart.biz/fullchain.pem ]; then
           echo 'Requesting initial certificate...'
           certbot certonly --webroot -w /var/www/certbot \
             -d goldencart.biz \
@@ -85,9 +84,7 @@ services:
             --agree-tos \
             --no-eff-email \
             --non-interactive
-        else
-          echo 'Certificate already exists, skipping.'
-        fi
+       
 
 
   certbot:
