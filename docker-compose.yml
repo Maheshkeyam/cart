@@ -77,22 +77,28 @@ services:
       - |
         echo 'Waiting for nginx to be ready...'
         sleep 15
-          cd /var/www/certbot
-          pwd
-          echo 'Requesting initial certificate...'
-          certbot certonly --webroot -w /var/www/certbot \
-            -d goldencart.biz \
-            --email goldencartbiz@gmail.com \
-            --agree-tos \
-            --no-eff-email \
-            --non-interactive
-       
 
+        echo 'Backing up existing certs...'
+        mkdir -p /tmp/certbackup
+        cp -r /etc/letsencrypt/* /tmp/certbackup/ || true
 
-  certbot:
-    image: certbot/certbot:latest
-    container_name: bagisto_certbot
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $!; done;'"
+        echo 'Requesting initial certificate...'
+        if certbot certonly --webroot -w /var/www/certbot \
+          -d goldencart.biz \
+          --email goldencartbiz@gmail.com \
+          --agree-tos \
+          --no-eff-email \
+          --non-interactive; then
+            echo 'Certificate successfully created.'
+        else
+            echo 'Certificate request failed. Restoring backup...'
+            cp -r /tmp/certbackup/* /etc/letsencrypt/
+        fi
+
+  # certbot:
+  #   image: certbot/certbot:latest
+  #   container_name: bagisto_certbot
+  #   volumes:
+  #     - ./certbot/conf:/etc/letsencrypt
+  #     - ./certbot/www:/var/www/certbot
+  #   entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $!; done;'"
