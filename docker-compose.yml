@@ -77,6 +77,8 @@ services:
       - |
         echo 'Waiting for nginx to be ready...'
         sleep 15
+          cd /var/www/certbot
+          pwd
           echo 'Requesting initial certificate...'
           certbot certonly --webroot -w /var/www/certbot \
             -d goldencart.biz \
