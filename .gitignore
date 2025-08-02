@@ -17,7 +17,7 @@ npm-debug.log
 package-lock.json
 /playwright-report
 /public/css
-/public/js
+/public/jsf
 /public/hot
 /public/storage
 /public/vendor
@@ -30,5 +30,7 @@ yarn.lock
 yarn-error.log
 /test-results
 /playwright-report
-/mysql-data
 mysql-data
+/mysql-data
+mysql-data/*
+/mysql-data/*
