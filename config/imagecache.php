@@ -29,11 +29,13 @@ return [
     |
      */
 
+    // 'paths' => [
+    //     storage_path('app/public'),
+    //     public_path('storage'),
+    // ],
     'paths' => [
-        storage_path('app/public'),
-        public_path('storage'),
+            env('AWS_FILE_PATH'),
     ],
-
     /*
     |--------------------------------------------------------------------------
     | Manipulation templates

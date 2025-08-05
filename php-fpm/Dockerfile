@@ -19,10 +19,12 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     zlib1g-dev \
     libjpeg62-turbo-dev \
-    libmagickwand-dev --no-install-recommends
+    libmagickwand-dev \
+    libwebp-dev \
+    --no-install-recommends
 
-# Configure GD
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+# Configure GD to include WebP support
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
 
 # Install PHP extensions (only those that need to be compiled)
 RUN docker-php-ext-install -j$(nproc) \

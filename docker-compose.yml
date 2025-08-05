@@ -11,6 +11,7 @@ services:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
       - ./nginx/generate-ssl.sh:/generate-ssl.sh
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     entrypoint: ["/generate-ssl.sh"]
     depends_on:
       - php-fpm
@@ -37,7 +38,6 @@ services:
           php artisan cache:clear;
           php artisan config:clear;
           rm -f public/storage;
-          php artisan storage:link;
           php artisan optimize;
         fi;
         php-fpm

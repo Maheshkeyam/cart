@@ -17,7 +17,8 @@
         validations="{{ $field->getValidations() }}"
         is-require="{{ $field->isRequired() }}"
         depend-name="{{ $field->getDependFieldName() }}"
-        src="{{ Storage::url($value) }}"
+        
+        src="{{ $value ? Storage::url($value) : '' }}"
         field-data="{{ json_encode($field) }}"
         channel-count="{{ $channels->count() }}"
         current-channel="{{ $currentChannel }}"
